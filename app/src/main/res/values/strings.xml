@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">PhotoToSgf</string>
-
-    <string name="hello_world">Hello world!</string>
+    <string name="camera_button">Capture state of the game</string>
     <string name="action_settings">Settings</string>
 </resources>

@@ -1,21 +1,29 @@
 package com.siulkilulki.phototosgf;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import org.opencv.android.OpenCVLoader;
 
 public class MainActivity extends ActionBarActivity {
 
     static {
-        if(!OpenCVLoader.initDebug()){
-            Log.i("opencv","opencv initialization failed");
+        if(!OpenCVLoader.initDebug()){ /* initialize opencv library */
+            Log.i("siulkilulki.opencv","opencv initialization failed");
         } else {
-            Log.i("opencv","opencv initialization successful");
+            Log.i("siulkilulki.opencv","opencv initialization successful");
         }
+    }
+
+    public void startCameraActivity(View view) {
+        Intent intent = new Intent(this, Camera.class);
+        // starts Camera.java activity
+        startActivity(intent);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
