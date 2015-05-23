@@ -44,7 +44,7 @@ public class MainActivity extends ActionBarActivity {
 
     public void startCameraActivity(View view) {
         Intent intent = new Intent(this, Camera.class);
-        // starts Camera.java activity
+        //  starts Camera.java activity
         startActivity(intent);
     }
 
