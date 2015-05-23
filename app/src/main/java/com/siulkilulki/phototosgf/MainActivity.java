@@ -82,7 +82,7 @@ public class MainActivity extends ActionBarActivity {
                 Utils.matToBitmap(dstMatImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
                 mainImView.setImageBitmap(bitmap);//wyswietla "bitmap" w mainImView
-                 mAttacher = new PhotoViewAttacher(mainImView); // umozliwia zoom
+                mAttacher = new PhotoViewAttacher(mainImView); // umozliwia zoom
 
 
             }
