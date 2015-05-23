@@ -12,13 +12,20 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.ImageView;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -82,7 +89,15 @@ public class Camera extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Log.i("siulkilulki.camera","photo taken and saved, probably");
-            Mat image = Highgui.imread(mCurrentPhotoPath);
+
+            Mat image = Highgui.imread(mCurrentPhotoPath, Imgproc.COLOR_BGR2BGRA);
+            Mat dstImage = image;
+            Imgproc.GaussianBlur(image, dstImage, new Size(19,19), 0);
+            //List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+            //Imgproc.threshold(dstImage, image, 255, Imgproc.THRESH_BINARY, Imgproc.THRESH_BINARY);
+            //Imgproc.findContours(image, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+            //Imgproc.drawContours(imageA, contours, 1, new Scalar(0,0,255));
+            Highgui.imwrite(mCurrentPhotoPath, dstImage);
             if (image == null)
                 Log.i("siulkilulki.camera", "image not read properly to Mat obj");
             else
