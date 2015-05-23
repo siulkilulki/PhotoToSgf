@@ -87,7 +87,7 @@ public class Camera extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {//jak jest zrobione zdjecie to sie wykonuje
             Log.i("siulkilulki.camera","photo taken and saved, probably");
 
             Mat image = Highgui.imread(mCurrentPhotoPath, Imgproc.COLOR_BGR2BGRA);
@@ -106,7 +106,7 @@ public class Camera extends Activity {
             mImageView = (ImageView) findViewById(R.id.camera_background);
             Bitmap bMap = BitmapFactory.decodeFile(mCurrentPhotoPath);
             mImageView.setImageBitmap(bMap);
-            mAttacher = new PhotoViewAttacher(mImageView);
+            mAttacher = new PhotoViewAttacher(mImageView);//umozliwia zoom
 
         }
     }

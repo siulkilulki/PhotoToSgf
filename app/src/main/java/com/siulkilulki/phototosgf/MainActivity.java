@@ -32,7 +32,7 @@ public class MainActivity extends ActionBarActivity {
     private ImageView mainImView;
     private Button button;
     private Context context = this;
-    private PhotoViewAttacher mAttacher;
+    private PhotoViewAttacher mAttacher; // umozliwia zoom obrazka
     Bitmap bitmap;
     static {
         if(!OpenCVLoader.initDebug()){ /* initialize opencv library */
@@ -51,8 +51,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mainImView = (ImageView) findViewById(R.id.mainImageView
+        setContentView(R.layout.activity_main); //ustawia layout na activity_main
+        mainImView = (ImageView) findViewById(R.id.mainImageView //mainImageView jest w pliku layoutowym activity_main.xml. Przypisujemy to view do mainImView.
         );
         button = (Button) findViewById(R.id.buttonProcessImage);
         button.setOnClickListener(new View.OnClickListener() {
@@ -63,7 +63,7 @@ public class MainActivity extends ActionBarActivity {
                 //String imageUri = path.toString();
 
                 //Mat matImg = Utils.loadResource( context , R.drawable.android_robot, Highgui.CV_LOAD_IMAGE_COLOR);
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.plansza);
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.plansza); // tworzy bitmape z plansza.jpg
                 //Mat matImg = Highgui.imread(imageUri);
                 //if (matImg == null)
                   //  Log.i("siulkilulki.main",String.valueOf(matImg.cols()));
@@ -74,15 +74,15 @@ public class MainActivity extends ActionBarActivity {
                 //tempMat.convertTo(matImg, CvType.CV_32FC1);
                 //matImg.convertTo(matImg, CvType.CV_32FC1);
                 Mat dstMatImg = new Mat(matImg.rows(), matImg.cols(), matImg.type());
-                Imgproc.cvtColor(matImg, dstMatImg, Imgproc.COLOR_BGR2GRAY);
+                Imgproc.cvtColor(matImg, dstMatImg, Imgproc.COLOR_BGR2GRAY); //dstMatImg bedzie czarno-biale
                 Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
                 Imgproc.threshold(matImg, dstMatImg, 0,255,Imgproc.THRESH_OTSU);
 
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);dawid
                 Utils.matToBitmap(dstMatImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
-                mainImView.setImageBitmap(bitmap);
-                mAttacher = new PhotoViewAttacher(mainImView);
+                mainImView.setImageBitmap(bitmap);//wyswietla "bitmap" w mainImView
+                 mAttacher = new PhotoViewAttacher(mainImView); // umozliwia zoom
 
 
             }
