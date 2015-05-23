@@ -79,7 +79,6 @@ public class MainActivity extends ActionBarActivity {
                 Imgproc.threshold(matImg, dstMatImg, 0,255,Imgproc.THRESH_OTSU);
 
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);
-
                 Utils.matToBitmap(dstMatImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
                 mainImView.setImageBitmap(bitmap);
