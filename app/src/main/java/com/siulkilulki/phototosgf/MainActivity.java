@@ -76,8 +76,8 @@ public class MainActivity extends ActionBarActivity {
                 Mat dstMatImg = new Mat(matImg.rows(), matImg.cols(), matImg.type());
                 Imgproc.cvtColor(matImg, dstMatImg, Imgproc.COLOR_BGR2GRAY); //dstMatImg bedzie czarno-biale
                 Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
-                Imgproc.threshold(matImg, dstMatImg, 0,255,Imgproc.THRESH_OTSU);
-
+                //Imgproc.threshold(matImg, dstMatImg, 0,255,Imgproc.THRESH_OTSU);
+                Imgproc.adaptiveThreshold(matImg, dstMatImg,255,Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV,15,4);
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);dawid
                 Utils.matToBitmap(dstMatImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
