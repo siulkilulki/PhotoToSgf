@@ -20,6 +20,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
@@ -63,7 +64,7 @@ public class MainActivity extends ActionBarActivity {
                 //String imageUri = path.toString();
 
                 //Mat matImg = Utils.loadResource( context , R.drawable.android_robot, Highgui.CV_LOAD_IMAGE_COLOR);
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.plansza); // tworzy bitmape z plansza.jpg
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.plansza1); // tworzy bitmape z plansza.jpg
                 //Mat matImg = Highgui.imread(imageUri);
                 //if (matImg == null)
                   //  Log.i("siulkilulki.main",String.valueOf(matImg.cols()));
@@ -76,8 +77,28 @@ public class MainActivity extends ActionBarActivity {
                 Mat dstMatImg = new Mat(matImg.rows(), matImg.cols(), matImg.type());
                 Imgproc.cvtColor(matImg, dstMatImg, Imgproc.COLOR_BGR2GRAY); //dstMatImg bedzie czarno-biale
                 Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
-                //Imgproc.threshold(matImg, dstMatImg, 0,255,Imgproc.THRESH_OTSU);
-                Imgproc.adaptiveThreshold(matImg, dstMatImg,255,Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV,15,4);
+                //Imgproc.threshold(matImg, dstMatImg, 0, 255, Imgproc.THRESH_OTSU);
+                Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);
+                Mat kernel = new Mat();
+                byte data[] = new byte[9];
+                for (int i = 0; i < 9; i++) {
+                        data[i] = 1;
+                }
+                for (int i = 0; i < 9; i++) {
+                    Log.i("kernel", String.valueOf(data[i]));
+                }
+                kernel.put(0, 0, data);
+                //Mat test = new Mat();
+                //test = Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3,3));
+                /*byte[] return_buff = new byte[(int) (kernel.total() * kernel.channels())];
+                kernel.get(0, 0, return_buff);
+                for (int i = 0; i < return_buff.length; i++) {
+                    Log.i("kernel",String.valueOf(return_buff[i]));
+                }
+                Point anchor = new Point(-13,11);
+                Imgproc.erode(dstMatImg, dstMatImg, kernel);
+*/
+                Log.i("kernel", "kernel total = "+String.valueOf(kernel.total()));
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);dawid
                 Utils.matToBitmap(dstMatImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
