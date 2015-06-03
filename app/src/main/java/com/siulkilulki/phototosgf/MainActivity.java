@@ -79,26 +79,36 @@ public class MainActivity extends ActionBarActivity {
                 Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
                 //Imgproc.threshold(matImg, dstMatImg, 0, 255, Imgproc.THRESH_OTSU);
                 Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);
-                Mat kernel = new Mat();
-                byte data[] = new byte[9];
-                for (int i = 0; i < 9; i++) {
+                Mat kernel = new Mat(25,25, CvType.CV_8U);
+                byte data[] = new byte[625];
+                //tworzenie tablicy bajtów, jedynki są w ostatniej kolumnie i ostatnim wierszu
+                for (int i = 0; i < 625; i++) {
+                    if (i%25 == 24 || i >= 600) {
                         data[i] = 1;
+                    }
+                    else {
+                        data[i] = 0;
+                    }
+
                 }
-                for (int i = 0; i < 9; i++) {
-                    Log.i("kernel", String.valueOf(data[i]));
-                }
-                kernel.put(0, 0, data);
+
+                kernel.put(0, 0, data); // wpycha tablice bajtów do kernela
                 //Mat test = new Mat();
                 //test = Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3,3));
-                /*byte[] return_buff = new byte[(int) (kernel.total() * kernel.channels())];
+
+                // do sprawdzania czy poprawny kernel
+                byte[] return_buff = new byte[(int) (kernel.total() * kernel.channels())];
                 kernel.get(0, 0, return_buff);
                 for (int i = 0; i < return_buff.length; i++) {
-                    Log.i("kernel",String.valueOf(return_buff[i]));
+                    Log.i("kernel","i ="+ String.valueOf(i)+": "+String.valueOf(return_buff[i]));
                 }
-                Point anchor = new Point(-13,11);
-                Imgproc.erode(dstMatImg, dstMatImg, kernel);
-*/
-                Log.i("kernel", "kernel total = "+String.valueOf(kernel.total()));
+                Point anchor = new Point(24,24);// ustawienie anchora w prawym dolnym rogu
+                Point anchor1 = new Point(-1,-1);
+                Imgproc.erode(dstMatImg, dstMatImg, kernel, anchor, 1);
+
+                Log.i("kernel", "kernel total = " + String.valueOf(kernel.total()));
+                Log.i("kernel", "kernel height = "+String.valueOf(kernel.height()));
+                Log.i("kernel", "kernel width = "+String.valueOf(kernel.width()));
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);dawid
                 Utils.matToBitmap(dstMatImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
