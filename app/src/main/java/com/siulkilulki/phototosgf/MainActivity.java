@@ -18,14 +18,20 @@ import android.widget.ImageView;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.Scalar;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -79,8 +85,9 @@ public class MainActivity extends ActionBarActivity {
                 Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
                 //Imgproc.threshold(matImg, dstMatImg, 0, 255, Imgproc.THRESH_OTSU);
                 Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);
-                Mat kernel = new Mat(25,25, CvType.CV_8U);
-                byte data[] = new byte[625];
+                int sideSize = 30;
+                Mat kernel = new Mat(sideSize,sideSize, CvType.CV_8U);
+                /*byte data[] = new byte[625];
                 //tworzenie tablicy bajtów, jedynki są w ostatniej kolumnie i ostatnim wierszu
                 for (int i = 0; i < 625; i++) {
                     if (i%25 == 24 || i >= 600) {
@@ -90,6 +97,15 @@ public class MainActivity extends ActionBarActivity {
                         data[i] = 0;
                     }
 
+                }*/
+                byte data[] = new byte[sideSize*sideSize];
+                for (int i = 0; i < sideSize*sideSize; i++) {
+                    if(i%sideSize == sideSize-1 || i >= sideSize*sideSize-sideSize) {
+                        data[i] = 1;
+                    }
+                    else {
+                        data[i] = 0;
+                    }
                 }
 
                 kernel.put(0, 0, data); // wpycha tablice bajtów do kernela
@@ -102,7 +118,7 @@ public class MainActivity extends ActionBarActivity {
                 for (int i = 0; i < return_buff.length; i++) {
                     Log.i("kernel","i ="+ String.valueOf(i)+": "+String.valueOf(return_buff[i]));
                 }
-                Point anchor = new Point(24,24);// ustawienie anchora w prawym dolnym rogu
+                Point anchor = new Point(sideSize-1,sideSize-1);// ustawienie anchora w prawym dolnym rogu
                 Point anchor1 = new Point(-1,-1);
                 Imgproc.erode(dstMatImg, dstMatImg, kernel, anchor, 1);
 
@@ -110,7 +126,15 @@ public class MainActivity extends ActionBarActivity {
                 Log.i("kernel", "kernel height = "+String.valueOf(kernel.height()));
                 Log.i("kernel", "kernel width = "+String.valueOf(kernel.width()));
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);dawid
-                Utils.matToBitmap(dstMatImg, bitmap);
+
+                List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+                Mat hierarchy = new Mat();
+                Imgproc.findContours(dstMatImg, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+                for (int i = 0; i < contours.size(); i++) {
+                    Rect r = Imgproc.boundingRect(contours.get(i));
+                    Core.rectangle(matImg,new Point(r.x-10,r.y-10), new Point(r.x+r.width + 10, r.y + r.height+10), new Scalar(0,0,255),2,8,0);
+                }
+                Utils.matToBitmap(matImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
                 mainImView.setImageBitmap(bitmap);//wyswietla "bitmap" w mainImView
                 mAttacher = new PhotoViewAttacher(mainImView); // umozliwia zoom
