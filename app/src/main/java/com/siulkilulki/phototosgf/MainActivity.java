@@ -16,6 +16,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+
+
+
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -28,6 +31,8 @@ import org.opencv.imgproc.Imgproc;
 import java.io.IOException;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
+
+import static org.opencv.core.Core.bitwise_not;
 
 public class MainActivity extends ActionBarActivity {
     private ImageView mainImView;
@@ -76,14 +81,31 @@ public class MainActivity extends ActionBarActivity {
                 //matImg.convertTo(matImg, CvType.CV_32FC1);
                 Mat dstMatImg = new Mat(matImg.rows(), matImg.cols(), matImg.type());
                 Imgproc.cvtColor(matImg, dstMatImg, Imgproc.COLOR_BGR2GRAY); //dstMatImg bedzie czarno-biale
-                Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
-                //Imgproc.threshold(matImg, dstMatImg, 0, 255, Imgproc.THRESH_OTSU);
-                Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);
-                Mat kernel = new Mat(25,25, CvType.CV_8U);
-                byte data[] = new byte[625];
+     //           Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
+            //    Imgproc.threshold(matImg, dstMatImg, 0, 255, Imgproc.THRESH_OTSU);
+     //           Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);//bylo 15
+            //    bitwise_not ( dstMatImg, matImg ); //inwersja bialego i czarnego
+
+                //vector<Vec3f> circles;
+                Mat circles = new Mat();
+                Imgproc.HoughCircles(dstMatImg, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 35, 100, 50, 15, 25);
+
+
+
+                String dump = circles.dump();
+                Log.d("MAT", dump);
+                if (circles.empty())
+                    Log.d("EMPTY","E");
+                else {
+
+                    Log.d("Not Empty", "");
+                }
+/*
+                Mat kernel = new Mat(35,35, CvType.CV_8U);
+                byte data[] = new byte[1225];
                 //tworzenie tablicy bajtów, jedynki są w ostatniej kolumnie i ostatnim wierszu
-                for (int i = 0; i < 625; i++) {
-                    if (i%25 == 24 || i >= 600) {
+                for (int i = 0; i < 1225; i++) {
+                    if (i%35 == 34 || i >= 1190) {
                         data[i] = 1;
                     }
                     else {
@@ -102,14 +124,17 @@ public class MainActivity extends ActionBarActivity {
                 for (int i = 0; i < return_buff.length; i++) {
                     Log.i("kernel","i ="+ String.valueOf(i)+": "+String.valueOf(return_buff[i]));
                 }
-                Point anchor = new Point(24,24);// ustawienie anchora w prawym dolnym rogu
+                Point anchor = new Point(34,34);// ustawienie anchora w prawym dolnym rogu
                 Point anchor1 = new Point(-1,-1);
-                Imgproc.erode(dstMatImg, dstMatImg, kernel, anchor, 1);
+                Imgproc.erode(matImg, matImg, kernel, anchor, 1);
 
                 Log.i("kernel", "kernel total = " + String.valueOf(kernel.total()));
                 Log.i("kernel", "kernel height = "+String.valueOf(kernel.height()));
                 Log.i("kernel", "kernel width = "+String.valueOf(kernel.width()));
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);dawid
+
+
+*/
                 Utils.matToBitmap(dstMatImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
                 mainImView.setImageBitmap(bitmap);//wyswietla "bitmap" w mainImView
