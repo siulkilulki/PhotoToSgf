@@ -31,6 +31,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import java.util.List;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -85,7 +86,24 @@ public class MainActivity extends ActionBarActivity {
                 Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
                 //Imgproc.threshold(matImg, dstMatImg, 0, 255, Imgproc.THRESH_OTSU);
                 Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);
-                int sideSize = 30;
+
+
+                Mat circles = new Mat();
+                Imgproc.HoughCircles(dstMatImg, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 35, 100, 50, 15, 25);
+
+
+
+                String dump = circles.dump();
+                Log.d("MAT", dump);
+                if (circles.empty())
+                    Log.d("EMPTY","E");
+                else
+                    Log.d("Not Empty", "");
+
+///*
+
+            //-----------------------------EROZJA-----------------------------
+                int sideSize = 35;
                 Mat kernel = new Mat(sideSize,sideSize, CvType.CV_8U);
                 /*byte data[] = new byte[625];
                 //tworzenie tablicy bajtów, jedynki są w ostatniej kolumnie i ostatnim wierszu
@@ -98,6 +116,7 @@ public class MainActivity extends ActionBarActivity {
                     }
 
                 }*/
+                //  _|
                 byte data[] = new byte[sideSize*sideSize];
                 for (int i = 0; i < sideSize*sideSize; i++) {
                     if(i%sideSize == sideSize-1 || i >= sideSize*sideSize-sideSize) {
@@ -119,21 +138,127 @@ public class MainActivity extends ActionBarActivity {
                     Log.i("kernel","i ="+ String.valueOf(i)+": "+String.valueOf(return_buff[i]));
                 }
                 Point anchor = new Point(sideSize-1,sideSize-1);// ustawienie anchora w prawym dolnym rogu
-                Point anchor1 = new Point(-1,-1);
-                Imgproc.erode(dstMatImg, dstMatImg, kernel, anchor, 1);
+                Imgproc.erode(dstMatImg, matImg, kernel, anchor, 1);
 
-                Log.i("kernel", "kernel total = " + String.valueOf(kernel.total()));
-                Log.i("kernel", "kernel height = "+String.valueOf(kernel.height()));
-                Log.i("kernel", "kernel width = "+String.valueOf(kernel.width()));
+            //    Log.i("kernel", "kernel total = " + String.valueOf(kernel.total()));
+            //    Log.i("kernel", "kernel height = "+String.valueOf(kernel.height()));
+            //    Log.i("kernel", "kernel width = "+String.valueOf(kernel.width()));
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);dawid
 
                 List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
                 Mat hierarchy = new Mat();
-                Imgproc.findContours(dstMatImg, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-                for (int i = 0; i < contours.size(); i++) {
-                    Rect r = Imgproc.boundingRect(contours.get(i));
-                    Core.rectangle(matImg,new Point(r.x-10,r.y-10), new Point(r.x+r.width + 10, r.y + r.height+10), new Scalar(0,0,255),2,8,0);
+                Imgproc.findContours(matImg, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+
+                //------------------------------------------------------------
+                //   ^^|
+                for (int i = 0; i < sideSize*sideSize; i++) {
+                    if(i%sideSize == sideSize-1 || i < sideSize) {
+                        data[i] = 1;
+                    }
+                    else {
+                        data[i] = 0;
+                    }
                 }
+
+                kernel.put(0, 0, data); // wpycha tablice bajtów do kernela
+
+                anchor = new Point(sideSize-1,0);// ustawienie anchora w prawym dolnym rogu
+
+                Imgproc.erode(dstMatImg, matImg, kernel, anchor, 1);
+
+                List<MatOfPoint> contours1 = new ArrayList<MatOfPoint>();
+                Mat hierarchy1 = new Mat();
+                Imgproc.findContours(matImg, contours1, hierarchy1, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+
+                //-----------------------------------------------------------------------
+
+                //   |^^
+                for (int i = 0; i < sideSize*sideSize; i++) {
+                    if(i%sideSize == 0 || i < sideSize) {
+                        data[i] = 1;
+                    }
+                    else {
+                        data[i] = 0;
+                    }
+                }
+
+                kernel.put(0, 0, data); // wpycha tablice bajtów do kernela
+
+                anchor = new Point(0,0);// ustawienie anchora w prawym dolnym rogu
+
+                Imgproc.erode(dstMatImg, matImg, kernel, anchor, 1);
+
+                List<MatOfPoint> contours2 = new ArrayList<MatOfPoint>();
+                Mat hierarchy2 = new Mat();
+                Imgproc.findContours(matImg, contours2, hierarchy2, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+
+                //-----------------------------------------------------------------------
+                //   |_   =   L
+                for (int i = 0; i < sideSize*sideSize; i++) {
+                    if(i%sideSize == 0 || i >= sideSize*sideSize-sideSize) {
+                        data[i] = 1;
+                    }
+                    else {
+                        data[i] = 0;
+                    }
+                }
+
+                kernel.put(0, 0, data); // wpycha tablice bajtów do kernela
+
+                anchor = new Point(0,sideSize-1);// ustawienie anchora w prawym dolnym rogu
+
+                Imgproc.erode(dstMatImg, matImg, kernel, anchor, 1);
+
+                List<MatOfPoint> contours3 = new ArrayList<MatOfPoint>();
+                Mat hierarchy3 = new Mat();
+                Imgproc.findContours(matImg, contours3, hierarchy3, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+
+                //-----------------------------------------------------------------------
+               // Point[] points = new Point[];
+
+
+
+
+                List<MatOfPoint> wszystkoJedno = new ArrayList<MatOfPoint>();
+                wszystkoJedno.addAll(contours); //rozmiar = 1280
+                wszystkoJedno.addAll(contours1);
+                wszystkoJedno.addAll(contours2);
+                wszystkoJedno.addAll(contours3);
+
+
+
+                    int SS = contours.size()+contours1.size()+contours2.size()+contours3.size();
+                    String ss = String.valueOf(SS);
+                    int S = wszystkoJedno.size();
+                    String s = String.valueOf(S);
+                    Log.d("Not Empty ", s);
+                    Log.d("Not Empty ", ss);
+             //   for (int j=0; j<10; j++) {
+             //       String N = String.valueOf(contours.get(j).total());
+             //       Log.i("TOTAL POINT START", N);
+
+              //  }
+                Point[] tt = new Point[20];
+
+                Mat matt = wszystkoJedno.get(1);
+                String t = matt.toString();
+                //Point m = matt[0][0];
+                //String M = String.valueOf(matt[0][0]);
+                Log.i("TOTAL POINT END", t);
+
+
+
+
+                //Utils.bitmapToMat(bitmap, dstMatImg);
+            //    for (int i = 0; i < 5; i++) {
+            //        Rect r = Imgproc.boundingRect(wszystkoJedno.get(i));
+            //        Core.rectangle(dstMatImg, new Point(r.x - 10, r.y - 10), new Point(r.x + r.width + 10, r.y + r.height + 10), new Scalar(0, 0, 255), 2, 8, 0);
+            //    }
+//*/
                 Utils.matToBitmap(matImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
                 mainImView.setImageBitmap(bitmap);//wyswietla "bitmap" w mainImView
