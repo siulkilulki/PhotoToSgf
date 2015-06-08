@@ -76,16 +76,53 @@ public class MainActivity extends ActionBarActivity {
                   //  Log.i("siulkilulki.main",String.valueOf(matImg.cols()));
                 //Bitmap bitmap1 = Bitmap.createBitmap(matImg.cols(), matImg.rows(), Bitmap.Config.ARGB_8888);
                 Mat matImg = new Mat();
-                Mat tempMat = new Mat();
+
                 Utils.bitmapToMat(bitmap, matImg);
                 //tempMat.convertTo(matImg, CvType.CV_32FC1);
                 //matImg.convertTo(matImg, CvType.CV_32FC1);
                 Mat dstMatImg = new Mat(matImg.rows(), matImg.cols(), matImg.type());
                 Imgproc.cvtColor(matImg, dstMatImg, Imgproc.COLOR_BGR2GRAY); //dstMatImg bedzie czarno-biale
+
                 Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
                 //Imgproc.threshold(matImg, dstMatImg, 0, 255, Imgproc.THRESH_OTSU);
+
+                Mat sourceImg = new Mat();
+                Utils.bitmapToMat(bitmap, sourceImg);
+                Mat grayImg =  new Mat(sourceImg.rows(), sourceImg.cols(), sourceImg.type());
+                Imgproc.cvtColor(sourceImg, grayImg, Imgproc.COLOR_BGR2GRAY);
+
+                Mat blurImg = new Mat(sourceImg.rows(), sourceImg.cols(), sourceImg.type());
+                Imgproc.GaussianBlur(grayImg, blurImg, new Size(19, 19), 0);
+                Mat circleMat =  new Mat(sourceImg.rows(), sourceImg.cols(), sourceImg.type());
+                circleMat = blurImg;
+                //Imgproc.adaptiveThreshold(blurImg, circleMat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 4);
+                Mat circles = new Mat();
+                double iCannyUpperThreshold = 100.0;
+                int iMinRadius = 10;
+                int iMaxRadius = 100;
+                double iAccumulator = 100.0;
+                Log.i("circles", "image type = " + String.valueOf(circleMat.type()) + " channels =" + String.valueOf(circleMat.channels()));
+                Imgproc.HoughCircles(circleMat, circles, Imgproc.CV_HOUGH_GRADIENT, 2.0, circleMat.rows() / 20, iCannyUpperThreshold, iAccumulator, iMinRadius, iMaxRadius);
+                Imgproc.cvtColor(circleMat, circleMat, Imgproc.COLOR_BayerRG2RGB);
+                List<double[]> circlesCoordinates = new ArrayList<>();
+                if (circles.cols() > 0) {
+                    for (int i = 0; i < circles.cols(); i++) {
+                        double vCircle[] = circles.get(0,i);
+                        circlesCoordinates.add(vCircle);
+                        if (vCircle == null)
+                            break;
+
+                        Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
+                        int radius = (int)Math.round(vCircle[2]);
+                        // draw the found circle
+                        Core.circle(circleMat, pt, radius, new Scalar(0,255,0), 2);
+                        Core.circle(circleMat, pt, 3, new Scalar(0,0,255), 2);
+                    }
+                }
+                Log.i("circles", "circle columns = "+String.valueOf(circles.cols()));
+
                 Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);
-                int sideSize = 30;
+                final int sideSize = 30;
                 Mat kernel = new Mat(sideSize,sideSize, CvType.CV_8U);
                 /*byte data[] = new byte[625];
                 //tworzenie tablicy bajtów, jedynki są w ostatniej kolumnie i ostatnim wierszu
@@ -108,6 +145,16 @@ public class MainActivity extends ActionBarActivity {
                     }
                 }
 
+                byte data1[] = new byte[sideSize*sideSize];
+                for (int i = 0; i < sideSize*sideSize; i++) {
+                    if(i%sideSize == sideSize-1 || i >= sideSize*sideSize-sideSize) {
+                        data1[i] = 1;
+                    }
+                    else {
+                        data1[i] = 0;
+                    }
+                }
+
                 kernel.put(0, 0, data); // wpycha tablice bajtów do kernela
                 //Mat test = new Mat();
                 //test = Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3,3));
@@ -127,14 +174,15 @@ public class MainActivity extends ActionBarActivity {
                 Log.i("kernel", "kernel width = "+String.valueOf(kernel.width()));
                 //Imgproc.cornerHarris(matImg, dstMatImg, 2, 3, 0.04, 1);dawid
 
-                List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+                List<MatOfPoint> contours = new ArrayList<>();
                 Mat hierarchy = new Mat();
                 Imgproc.findContours(dstMatImg, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
                 for (int i = 0; i < contours.size(); i++) {
                     Rect r = Imgproc.boundingRect(contours.get(i));
-                    Core.rectangle(matImg,new Point(r.x-10,r.y-10), new Point(r.x+r.width + 10, r.y + r.height+10), new Scalar(0,0,255),2,8,0);
+                    Core.rectangle(sourceImg,new Point(r.x-10,r.y-10), new Point(r.x+r.width + 10, r.y + r.height+10), new Scalar(0,0,255),2,8,0);
+
                 }
-                Utils.matToBitmap(matImg, bitmap);
+                Utils.matToBitmap(circleMat, bitmap);
                 //Highgui.imwrite(imageUri, img);
                 mainImView.setImageBitmap(bitmap);//wyswietla "bitmap" w mainImView
                 mAttacher = new PhotoViewAttacher(mainImView); // umozliwia zoom
