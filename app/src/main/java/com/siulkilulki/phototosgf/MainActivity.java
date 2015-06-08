@@ -97,7 +97,7 @@ public class MainActivity extends ActionBarActivity {
 ///*
 
             //-----------------------------EROZJA-----------------------------
-                int sideSize = 35;
+                int sideSize = 40;
                 Mat kernel = new Mat(sideSize,sideSize, CvType.CV_8U);
                 /*byte data[] = new byte[625];
                 //tworzenie tablicy bajtów, jedynki są w ostatniej kolumnie i ostatnim wierszu
@@ -254,6 +254,17 @@ public class MainActivity extends ActionBarActivity {
                     Core.circle(mat, points.get(i), 20, new Scalar(255,0,0),10);
 
                 }
+                double tmp[] = new double[3];
+                List<double[]> crossCoordinates = new ArrayList<double[]>();
+
+                for (int i = 0; i < points.size(); i++) {
+                    tmp[0]=points.get(i).x;
+                    tmp[1]=points.get(i).y;
+                    tmp[2]=0;
+                    crossCoordinates.add(i, tmp);
+
+                }
+
 
 
             /*
