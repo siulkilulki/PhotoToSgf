@@ -32,9 +32,14 @@ import org.opencv.imgproc.Imgproc;
 import java.io.IOException;
 import java.util.ArrayList;
 
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
+
+import static org.opencv.core.Core.circle;
 
 public class MainActivity extends ActionBarActivity {
     private ImageView mainImView;
@@ -88,17 +93,6 @@ public class MainActivity extends ActionBarActivity {
                 Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);
 
 
-                Mat circles = new Mat();
-                Imgproc.HoughCircles(dstMatImg, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 35, 100, 50, 15, 25);
-
-
-
-                String dump = circles.dump();
-                Log.d("MAT", dump);
-                if (circles.empty())
-                    Log.d("EMPTY","E");
-                else
-                    Log.d("Not Empty", "");
 
 ///*
 
@@ -130,13 +124,15 @@ public class MainActivity extends ActionBarActivity {
                 kernel.put(0, 0, data); // wpycha tablice bajtów do kernela
                 //Mat test = new Mat();
                 //test = Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3,3));
-
-                // do sprawdzania czy poprawny kernel
-                byte[] return_buff = new byte[(int) (kernel.total() * kernel.channels())];
+    //---------------------------------------------------------------------------------------------
+    // do sprawdzania czy poprawny kernel
+    /*            byte[] return_buff = new byte[(int) (kernel.total() * kernel.channels())];
                 kernel.get(0, 0, return_buff);
                 for (int i = 0; i < return_buff.length; i++) {
                     Log.i("kernel","i ="+ String.valueOf(i)+": "+String.valueOf(return_buff[i]));
                 }
+    */
+                //---------------------------------------------------------------------------------------------
                 Point anchor = new Point(sideSize-1,sideSize-1);// ustawienie anchora w prawym dolnym rogu
                 Imgproc.erode(dstMatImg, matImg, kernel, anchor, 1);
 
@@ -229,14 +225,45 @@ public class MainActivity extends ActionBarActivity {
                 wszystkoJedno.addAll(contours2);
                 wszystkoJedno.addAll(contours3);
 
+                List<Point> points = new ArrayList<Point>();
+
+                for (int i = 0; i < wszystkoJedno.size()-1; i++) {
+                    Rect r = Imgproc.boundingRect(wszystkoJedno.get(i));
+                    //Core.rectangle(mat, new Point(r.x - 10, r.y - 10), new Point(r.x + r.width + 10, r.y + r.height + 10), new Scalar(0, 0, 255), 2, 8, 0);
+                    points.add(i,new Point(r.x+r.width/2,r.y+r.height/2));
+                }
+
+                int SS = points.size();
+                String ss = String.valueOf(SS);
+                Log.d("size of points with d", ss);
+
+                Set<Point> hs = new HashSet<>();
+                hs.addAll(points);
+                wszystkoJedno.clear();
+                points.clear();
+                points.addAll(hs);
+
+                SS = points.size();
+                ss = String.valueOf(SS);
+                Log.d("size of points ", ss);
+
+                Mat mat = new Mat();
+                Utils.bitmapToMat(bitmap, mat);
+                for (int i = 0; i < points.size(); i++) {
+                    //Log.i("JEST w rysowaniu", "kolek");
+                    Core.circle(mat, points.get(i), 20, new Scalar(255,0,0),10);
+
+                }
 
 
+            /*
                     int SS = contours.size()+contours1.size()+contours2.size()+contours3.size();
                     String ss = String.valueOf(SS);
                     int S = wszystkoJedno.size();
                     String s = String.valueOf(S);
                     Log.d("Not Empty ", s);
                     Log.d("Not Empty ", ss);
+
              //   for (int j=0; j<10; j++) {
              //       String N = String.valueOf(contours.get(j).total());
              //       Log.i("TOTAL POINT START", N);
@@ -250,16 +277,11 @@ public class MainActivity extends ActionBarActivity {
                 //String M = String.valueOf(matt[0][0]);
                 Log.i("TOTAL POINT END", t);
 
+            */
 
 
-
-                //Utils.bitmapToMat(bitmap, dstMatImg);
-            //    for (int i = 0; i < 5; i++) {
-            //        Rect r = Imgproc.boundingRect(wszystkoJedno.get(i));
-            //        Core.rectangle(dstMatImg, new Point(r.x - 10, r.y - 10), new Point(r.x + r.width + 10, r.y + r.height + 10), new Scalar(0, 0, 255), 2, 8, 0);
-            //    }
 //*/
-                Utils.matToBitmap(matImg, bitmap);
+                Utils.matToBitmap(mat, bitmap);
                 //Highgui.imwrite(imageUri, img);
                 mainImView.setImageBitmap(bitmap);//wyswietla "bitmap" w mainImView
                 mAttacher = new PhotoViewAttacher(mainImView); // umozliwia zoom
