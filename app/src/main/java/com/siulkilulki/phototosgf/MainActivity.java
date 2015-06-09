@@ -29,13 +29,20 @@ import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -76,7 +83,7 @@ public class MainActivity extends ActionBarActivity {
                 //String imageUri = path.toString();
 
                 //Mat matImg = Utils.loadResource( context , R.drawable.android_robot, Highgui.CV_LOAD_IMAGE_COLOR);
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.plansza1); // tworzy bitmape z plansza.jpg
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.plansza2); // tworzy bitmape z plansza.jpg
                 //Mat matImg = Highgui.imread(imageUri);
                 //if (matImg == null)
                   //  Log.i("siulkilulki.main",String.valueOf(matImg.cols()));
@@ -91,6 +98,8 @@ public class MainActivity extends ActionBarActivity {
                 Imgproc.GaussianBlur(dstMatImg, matImg, new Size(19, 19), 0);
                 //Imgproc.threshold(matImg, dstMatImg, 0, 255, Imgproc.THRESH_OTSU);
 
+        //----------------------------------- CIRCLES -------------------------------------------------------
+         Log.i("zaczynam","circles");
                 Mat sourceImg = new Mat();
                 Utils.bitmapToMat(bitmap, sourceImg);
                 Mat grayImg =  new Mat(sourceImg.rows(), sourceImg.cols(), sourceImg.type());
@@ -98,6 +107,9 @@ public class MainActivity extends ActionBarActivity {
 
                 Mat blurImg = new Mat(sourceImg.rows(), sourceImg.cols(), sourceImg.type());
                 Imgproc.GaussianBlur(grayImg, blurImg, new Size(19, 19), 0);
+
+
+
                 Mat circleMat =  new Mat(sourceImg.rows(), sourceImg.cols(), sourceImg.type());
                 circleMat = blurImg;
                 //Imgproc.adaptiveThreshold(blurImg, circleMat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 4);
@@ -106,33 +118,64 @@ public class MainActivity extends ActionBarActivity {
                 int iMinRadius = 10;
                 int iMaxRadius = 100;
                 double iAccumulator = 100.0;
-                Log.i("circles", "image type = " + String.valueOf(circleMat.type()) + " channels =" + String.valueOf(circleMat.channels()));
-                Imgproc.HoughCircles(circleMat, circles, Imgproc.CV_HOUGH_GRADIENT, 2.0, circleMat.rows() / 20, iCannyUpperThreshold, iAccumulator, iMinRadius, iMaxRadius);
+                //Log.i("circles", "image type = " + String.valueOf(circleMat.type()) + " channels =" + String.valueOf(circleMat.channels()));
+                Imgproc.HoughCircles(circleMat, circles, Imgproc.CV_HOUGH_GRADIENT, 2.0, circleMat.rows() / 26, iCannyUpperThreshold, iAccumulator, iMinRadius, iMaxRadius);
                 Imgproc.cvtColor(circleMat, circleMat, Imgproc.COLOR_BayerRG2RGB);
                 List<double[]> circlesCoordinates = new ArrayList<>();
                 if (circles.cols() > 0) {
                     for (int i = 0; i < circles.cols(); i++) {
                         double vCircle[] = circles.get(0,i);
-                        circlesCoordinates.add(vCircle);
+
                         if (vCircle == null)
                             break;
 
                         Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
                         int radius = (int)Math.round(vCircle[2]);
+
                         // draw the found circle
-                        Core.circle(circleMat, pt, radius, new Scalar(0,255,0), 2);
-                        Core.circle(circleMat, pt, 3, new Scalar(0,0,255), 2);
+                        Core.circle(sourceImg, pt, radius, new Scalar(0,255,0), 2);
+                        Core.circle(sourceImg, pt, 3, new Scalar(0,0,255), 2);
+
+                        //podmienic vCircle[2] z promienia na kolor
+                        double[] color = new double[3];
+                        color = sourceImg.get((int)vCircle[1], (int)vCircle[0]);
+                        if (color[0]==255){ //kolor bialy = 1
+                            vCircle[2]=1;
+                        }
+                        else //kolor czaeny = -1
+                            vCircle[2]=-1;
+
+                        //wpycha wspolrzedne i kod koloru do listy
+                        circlesCoordinates.add(vCircle);
+
+                /*
+                        //wyswietlanie wspolrzednych i kolorow kolek
+                        String s = String.valueOf(color[0]);
+                        String ss = String.valueOf(color[1]);
+                        String sss = String.valueOf(color[2]);
+                        String x = String.valueOf(vCircle[0]);
+                        String y = String.valueOf(vCircle[1]);
+                        String r = String.valueOf(vCircle[2]);
+
+                        Log.i("kolorRGB", s+" "+ss+" "+sss);
+                        Log.i("wspolrzedne x y r",x+" "+y+" "+r);
+                */
+
+
+
                     }
                 }
-                Log.i("circles", "circle columns = "+String.valueOf(circles.cols()));
+                Log.i("zaczynam", "threshold i erozje");
+        //----------------------------------- CIRCLES END-------------------------------------------------------
+
 
                 Imgproc.adaptiveThreshold(matImg, dstMatImg, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, 4);
 
 
 
-///*
 
-            //-----------------------------EROZJA-----------------------------
+
+        //------------------------------------ EROSION -----------------------------
                 final int sideSize = 40;
                 Mat kernel = new Mat(sideSize,sideSize, CvType.CV_8U);
                 /*byte data[] = new byte[625];
@@ -160,8 +203,8 @@ public class MainActivity extends ActionBarActivity {
                 kernel.put(0, 0, data); // wpycha tablice bajtów do kernela
                 //Mat test = new Mat();
                 //test = Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3,3));
-    //---------------------------------------------------------------------------------------------
-    // do sprawdzania czy poprawny kernel
+            //---------------------------------------------------------------------------------------------
+            // do sprawdzania czy poprawny kernel
     /*            byte[] return_buff = new byte[(int) (kernel.total() * kernel.channels())];
                 kernel.get(0, 0, return_buff);
                 for (int i = 0; i < return_buff.length; i++) {
@@ -205,7 +248,6 @@ public class MainActivity extends ActionBarActivity {
 
 
                 //-----------------------------------------------------------------------
-
                 //   |^^
                 for (int i = 0; i < sideSize*sideSize; i++) {
                     if(i%sideSize == 0 || i < sideSize) {
@@ -249,12 +291,12 @@ public class MainActivity extends ActionBarActivity {
                 Imgproc.findContours(matImg, contours3, hierarchy3, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
 
-                //-----------------------------------------------------------------------
+        //------------------------------------ EROSION END -----------------------------------
                // Point[] points = new Point[];
+                Log.i("zaczynam","laczenie erozji");
 
 
-
-
+                //laczenie kontorow z 4 erozji
                 List<MatOfPoint> wszystkoJedno = new ArrayList<MatOfPoint>();
                 wszystkoJedno.addAll(contours); //rozmiar = 1280
                 wszystkoJedno.addAll(contours1);
@@ -262,73 +304,187 @@ public class MainActivity extends ActionBarActivity {
                 wszystkoJedno.addAll(contours3);
 
                 List<Point> points = new ArrayList<Point>();
-
+                //wyciaganie tylko srodkow z kontorow
                 for (int i = 0; i < wszystkoJedno.size()-1; i++) {
                     Rect r = Imgproc.boundingRect(wszystkoJedno.get(i));
-                    //Core.rectangle(mat, new Point(r.x - 10, r.y - 10), new Point(r.x + r.width + 10, r.y + r.height + 10), new Scalar(0, 0, 255), 2, 8, 0);
                     points.add(i,new Point(r.x+r.width/2,r.y+r.height/2));
                 }
 
-                int SS = points.size();
-                String ss = String.valueOf(SS);
-                Log.d("size of points with d", ss);
+                //int SS = points.size();
+                //String ss = String.valueOf(SS);
+                //Log.d("size of points with duplicates", ss);
 
+                //usuniecie duplikatow z points
                 Set<Point> hs = new HashSet<>();
                 hs.addAll(points);
                 wszystkoJedno.clear();
                 points.clear();
                 points.addAll(hs);
 
-                SS = points.size();
-                ss = String.valueOf(SS);
-                Log.d("size of points ", ss);
+        //punktow przeciec jest za duzo wiec trzeba si pozbyc nadmiaru
+            Log.i("tworze", "mat do cross");
+                Mat crossImg = new Mat();
+                Utils.bitmapToMat(bitmap, crossImg);
+                crossImg.setTo(new Scalar(0, 0, 0));//wypelnienie maciezy czarnym kolorem
 
-                Mat mat = new Mat();
-                Utils.bitmapToMat(bitmap, mat);
+
+            Log.i("rysuje", "kolejne przeciecia");
+                //rysowanie kolek na wszystkich przecieciach
+
                 for (int i = 0; i < points.size(); i++) {
-                    //Log.i("JEST w rysowaniu", "kolek");
-                    Core.circle(mat, points.get(i), 20, new Scalar(255,0,0),10);
-
+                    //Core.circle(sourceImg, points.get(i), 20, new Scalar(255,0,0),10);
+                    Core.circle(crossImg, points.get(i), 40, new Scalar(255,255,255),-1);//rysownie na specjalnej czarnj macierzy
                 }
-                double tmp[] = new double[3];
+
+
+                Imgproc.cvtColor(crossImg, crossImg, Imgproc.COLOR_BGR2GRAY);
+                Imgproc.GaussianBlur(crossImg, crossImg, new Size(19, 19), 0);
+
+                Mat circles2 = new Mat();
+                //circles.release();//usuwa poprzednia zawartosc
+
+                Imgproc.HoughCircles(crossImg, circles2, Imgproc.CV_HOUGH_GRADIENT, 2.0, crossImg.rows() / 35, 100.0, 20.0, 35, 100);
+                Imgproc.cvtColor(crossImg, crossImg, Imgproc.COLOR_BayerRG2RGB);
+
                 List<double[]> crossCoordinates = new ArrayList<double[]>();
+                if (circles2.cols() > 0) {
+                    Log.i("jestem", "w circles2.cols>0");
+                    for (int i = 0; i < circles2.cols(); i++) {
+                        double vCircle[] = circles2.get(0,i);
+                        if (vCircle == null)
+                            break;
 
-                for (int i = 0; i < points.size(); i++) {
-                    tmp[0]=points.get(i).x;
-                    tmp[1]=points.get(i).y;
-                    tmp[2]=0;
-                    crossCoordinates.add(i, tmp);
 
+                        Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
+                        int radius = (int)Math.round(vCircle[2]);
+                        // draw the found circle
+                        Core.circle(sourceImg, pt, radius, new Scalar(255,0,0), 4);
+                        Core.circle(sourceImg, pt, 3, new Scalar(0,0,255), 2);
+
+                        //podmienic vCircle[2] z promienia na 0
+                        vCircle[2]=0;
+                        //wpycha wspolrzedne i kod koloru do listy
+                        crossCoordinates.add(vCircle);
+
+                /*
+                        //wyswietlanie wspolrzednych i 0 na trzecim miejscu
+
+                        String x = String.valueOf(vCircle[0]);
+                        String y = String.valueOf(vCircle[1]);
+                        String r = String.valueOf(vCircle[2]);
+                        Log.i("wspolrzedne x y r",x+" "+y+" "+r);
+                */
+
+
+
+                    }
                 }
+                else
+                    Log.i("circles2",String.valueOf(circles2.size()));
+                points.clear();
+
+        //---------------------------------- koniec pozbywania nadmiaru przeciec ---------
+
+
+
+                //specjalny comperator do listy tablic
+                final java.util.Comparator<double[]> comp = new java.util.Comparator<double[]>() {
+                    public int compare(double[] a, double[] b) {
+                        if (a[1] == b[1]){ //a i b sa wjednym rzedzie (porownuje y)
+                            return Double.compare(a[0], b[0]);
+                        }
+                        else
+                            return Double.compare(a[1], b[1]);
+                    }
+                };
+
+
+
+                double tmp[] = new double[3];
+
+
+
+         ///*       //wypisuje wszystkie posortowane punkty przeciec
+                Log.i("WSZYSTKIE CROSS", "patrz");
+                Collections.sort(crossCoordinates, comp);
+                for (int i = 0; i < crossCoordinates.size(); i++) {
+                    tmp = crossCoordinates.get(i);
+                    Log.i("x y 0", String.valueOf(tmp[0]) + " " + String.valueOf(tmp[1]) + " " + String.valueOf(tmp[2]));
+                }
+                Log.i("CrossCoordinates",String.valueOf(crossCoordinates.size()));
+        //*/
 
 
 
             /*
-                    int SS = contours.size()+contours1.size()+contours2.size()+contours3.size();
-                    String ss = String.valueOf(SS);
-                    int S = wszystkoJedno.size();
-                    String s = String.valueOf(S);
-                    Log.d("Not Empty ", s);
-                    Log.d("Not Empty ", ss);
+                Log.i("circleCcoordinates", String.valueOf(circlesCoordinates.size()));
 
-             //   for (int j=0; j<10; j++) {
-             //       String N = String.valueOf(contours.get(j).total());
-             //       Log.i("TOTAL POINT START", N);
+                Log.i("WSZYSTKIE CIRCLES","");
+                for (int i = 0; i < circlesCoordinates.size(); i++) {
+                    tmp = circlesCoordinates.get(i);
+                    Log.i("x y kolor", String.valueOf(tmp[0]) + " " + String.valueOf(tmp[1]) + " " + String.valueOf(tmp[2]));
+                }
+            */
 
-              //  }
-                Point[] tt = new Point[20];
+                List<double[]> coordinates = new ArrayList<double[]>();
 
-                Mat matt = wszystkoJedno.get(1);
-                String t = matt.toString();
-                //Point m = matt[0][0];
-                //String M = String.valueOf(matt[0][0]);
-                Log.i("TOTAL POINT END", t);
+                coordinates.addAll(circlesCoordinates);
+                coordinates.addAll(crossCoordinates);
+                Collections.sort(coordinates, comp);
+            /*
+                //wypisuje wszystkie posortowane punkty
+                Log.i("WSZYSTKIE punkty", "patrz");
+                for (int i = 0; i < coordinates.size(); i++) {
+                    tmp = coordinates.get(i);
+                    Log.i("x y 0", String.valueOf(tmp[0]) + " " + String.valueOf(tmp[1]) + " " + String.valueOf(tmp[2]));
+                }
 
             */
 
 
-//*/
-                Utils.matToBitmap(mat, bitmap);
+
+                int x=1, y=1;
+       //OSTATECZNE WYLICZANIE NUMEROW LINII
+                Log.i("coordinates", String.valueOf(coordinates.size()));
+                for (int i = 0; i < coordinates.size(); i++) {
+
+                    //tmp = coordinates.get(i);
+                    //Log.i("x y kolor", String.valueOf(tmp[0]) + " " + String.valueOf(tmp[1]) + " " + String.valueOf(tmp[2]));
+                    //Log.i("",String.valueOf(i%19+1) + " " + String.valueOf(Math.floor(i / 19)+1) + " " + String.valueOf(tmp[2]));
+                    tmp = coordinates.get(i);
+                    if (tmp[2] == 1){
+                        Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2])+"\t"+"kamien bialy");
+                        //Log.i("x", String.valueOf((int)Math.floor(i / 19)+1) + "\t" + "y: "+ String.valueOf(i%19+1) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien bialy");
+                        //Log.i("x", String.valueOf(y) + "\t" + "y: "+ String.valueOf(x) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien bialy");
+                    }
+                    else if (tmp[2] == -1){
+                        Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2])+"\t"+"kamien czarny");
+                        //Log.i("x", String.valueOf((int)Math.floor(i / 19)+1) + "\t" + "y: " + String.valueOf(i%19+1) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien czarny");
+                        //Log.i("x", String.valueOf(y) + "\t" + "y: "+ String.valueOf(x) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien czarny");
+                    }
+                    else
+                        Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2]));
+                        //Log.i("x", String.valueOf((int)Math.floor(i / 19)+1) + "\t" + "y: " + String.valueOf(i%19+1) + "\t" + String.valueOf((int)tmp[2]));
+                        Log.i("x", String.valueOf(y) + "\t" + "y: "+ String.valueOf(x) + "\t" + String.valueOf((int)tmp[2]));
+
+                    if (x<19)//kolumny
+                        x++;
+                    else{
+                        x=1;
+                        y++;
+                    }
+
+
+
+
+                }
+
+
+
+
+
+                //Utils.matToBitmap(crossImg, bitmap); //do przeciec
+                Utils.matToBitmap(sourceImg, bitmap);
                 //Highgui.imwrite(imageUri, img);
                 mainImView.setImageBitmap(bitmap);//wyswietla "bitmap" w mainImView
                 mAttacher = new PhotoViewAttacher(mainImView); // umozliwia zoom
