@@ -472,7 +472,7 @@ public class MainActivity extends ActionBarActivity {
                     else{
                         x=1;
                         y++;
-                    }//
+                    }//j
 
 
 
