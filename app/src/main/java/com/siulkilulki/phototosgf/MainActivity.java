@@ -83,7 +83,7 @@ public class MainActivity extends ActionBarActivity {
                 //String imageUri = path.toString();
 
                 //Mat matImg = Utils.loadResource( context , R.drawable.android_robot, Highgui.CV_LOAD_IMAGE_COLOR);
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.plansza2); // tworzy bitmape z plansza.jpg
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.plansza1); // tworzy bitmape z plansza.jpg
                 //Mat matImg = Highgui.imread(imageUri);
                 //if (matImg == null)
                   //  Log.i("siulkilulki.main",String.valueOf(matImg.cols()));
@@ -332,7 +332,7 @@ public class MainActivity extends ActionBarActivity {
                 //rysowanie kolek na wszystkich przecieciach
 
                 for (int i = 0; i < points.size(); i++) {
-                    //Core.circle(sourceImg, points.get(i), 20, new Scalar(255,0,0),10);
+                    Core.circle(sourceImg, points.get(i), 20, new Scalar(255,0,0),10);
                     Core.circle(crossImg, points.get(i), 40, new Scalar(255,255,255),-1);//rysownie na specjalnej czarnj macierzy
                 }
 
@@ -358,8 +358,8 @@ public class MainActivity extends ActionBarActivity {
                         Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
                         int radius = (int)Math.round(vCircle[2]);
                         // draw the found circle
-                        Core.circle(sourceImg, pt, radius, new Scalar(255,0,0), 4);
-                        Core.circle(sourceImg, pt, 3, new Scalar(0,0,255), 2);
+                        Core.circle(crossImg, pt, radius, new Scalar(255,0,0), 4);
+                        Core.circle(crossImg, pt, 3, new Scalar(0,0,255), 2);
 
                         //podmienic vCircle[2] z promienia na 0
                         vCircle[2]=0;
@@ -404,7 +404,7 @@ public class MainActivity extends ActionBarActivity {
 
 
 
-         ///*       //wypisuje wszystkie posortowane punkty przeciec
+         /*       //wypisuje wszystkie posortowane punkty przeciec
                 Log.i("WSZYSTKIE CROSS", "patrz");
                 Collections.sort(crossCoordinates, comp);
                 for (int i = 0; i < crossCoordinates.size(); i++) {
@@ -412,7 +412,7 @@ public class MainActivity extends ActionBarActivity {
                     Log.i("x y 0", String.valueOf(tmp[0]) + " " + String.valueOf(tmp[1]) + " " + String.valueOf(tmp[2]));
                 }
                 Log.i("CrossCoordinates",String.valueOf(crossCoordinates.size()));
-        //*/
+        */
 
 
 
@@ -453,17 +453,17 @@ public class MainActivity extends ActionBarActivity {
                     //Log.i("",String.valueOf(i%19+1) + " " + String.valueOf(Math.floor(i / 19)+1) + " " + String.valueOf(tmp[2]));
                     tmp = coordinates.get(i);
                     if (tmp[2] == 1){
-                        Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2])+"\t"+"kamien bialy");
+                        //Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2])+"\t"+"kamien bialy");
                         //Log.i("x", String.valueOf((int)Math.floor(i / 19)+1) + "\t" + "y: "+ String.valueOf(i%19+1) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien bialy");
-                        //Log.i("x", String.valueOf(y) + "\t" + "y: "+ String.valueOf(x) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien bialy");
+                        Log.i("x", String.valueOf(y) + "\t" + "y: "+ String.valueOf(x) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien bialy");
                     }
                     else if (tmp[2] == -1){
-                        Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2])+"\t"+"kamien czarny");
+                        //Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2])+"\t"+"kamien czarny");
                         //Log.i("x", String.valueOf((int)Math.floor(i / 19)+1) + "\t" + "y: " + String.valueOf(i%19+1) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien czarny");
-                        //Log.i("x", String.valueOf(y) + "\t" + "y: "+ String.valueOf(x) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien czarny");
+                        Log.i("x", String.valueOf(y) + "\t" + "y: "+ String.valueOf(x) + "\t" + String.valueOf((int)tmp[2])+"\t"+"kamien czarny");
                     }
                     else
-                        Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2]));
+                        //Log.i("x", String.valueOf(tmp[1]) + "\t" + "y: "+ String.valueOf(tmp[0]) + "\t" + String.valueOf(tmp[2]));
                         //Log.i("x", String.valueOf((int)Math.floor(i / 19)+1) + "\t" + "y: " + String.valueOf(i%19+1) + "\t" + String.valueOf((int)tmp[2]));
                         Log.i("x", String.valueOf(y) + "\t" + "y: "+ String.valueOf(x) + "\t" + String.valueOf((int)tmp[2]));
 
